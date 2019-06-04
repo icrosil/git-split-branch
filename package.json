@@ -2,9 +2,12 @@
   "name": "git-split",
   "version": "0.0.0",
   "description": "split your branch into multiple by directories",
-  "main": "index.js",
+  "main": "bin/index.js",
   "repository": "git@github.com-icrosil:icrosil/git-split.git",
   "author": "Illia Olenchenko <icrosil@gmail.com>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "dependencies": {
+    "commander": "^2.20.0"
+  }
 }
