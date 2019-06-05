@@ -10,3 +10,7 @@ Acceptance criteria
 - Should confirm steps with user or log what it does
 - Usage should look like `git-split "dir1;dir2" dir3`
 - Branches could be not exact paths to directories but first found folders
+
+Nice Features:
+
+- Graceful errors
