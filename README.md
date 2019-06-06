@@ -14,3 +14,6 @@ Acceptance criteria
 Nice Features:
 
 - Graceful errors
+- eslint + prettier
+- publish
+- specs?
