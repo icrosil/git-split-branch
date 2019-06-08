@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "airbnb-base",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "max-len": [2, 120],
+    "prettier/prettier": "error"
+  },
+  "env": {
+    "node": true,
+    "jest": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
+  }
+}
