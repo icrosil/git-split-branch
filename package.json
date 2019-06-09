@@ -11,6 +11,8 @@
     "chalk": "^2.4.2",
     "commander": "^2.20.0",
     "fuzzy-search": "^3.0.1",
+    "log": "^6.0.0",
+    "log-node": "^7.0.0",
     "readdirp": "^3.0.2",
     "simple-git": "^1.113.0"
   },

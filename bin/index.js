@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 const program = require('commander');
-const chalk = require('chalk');
 
 const pack = require('../package.json');
 const fuzzDirs = require('../src/fuzzDirs');
 const repo = require('../src/repo');
+const { error } = require('../src/log');
 
 program.version(pack.version);
 
@@ -35,8 +35,9 @@ program
     console.log('nothing to do yet');
   });
 
+// TODO add logger
 try {
   program.parse(process.argv);
 } catch (err) {
-  console.log(chalk.red.bold(err.message));
+  error(err.message);
 }

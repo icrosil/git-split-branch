@@ -1,8 +1,10 @@
 const fs = require('fs');
 const gitP = require('simple-git/promise');
 
+const { info, notice } = require('./log');
+
 const repo = (workdir, options) => {
-  console.log('repo action in ', workdir);
+  info('repo action in ', workdir);
   if (!fs.existsSync(workdir)) {
     throw new Error(`workdir ${workdir} is not exists`);
   }
@@ -13,16 +15,17 @@ const repo = (workdir, options) => {
     }
     const repoRoot = (await git.raw(['rev-parse', '--show-toplevel'])).replace('\n', '');
     if (options.root) {
-      console.log(`Switching cwd to root of repo ${repoRoot}`);
+      notice(`Switching cwd to root of repo ${repoRoot}`);
       await git.cwd(repoRoot);
     } else {
-      console.log(`Leaving cwd in passed workdir ${workdir}`);
+      notice(`Leaving cwd in passed workdir ${workdir}`);
     }
     const repoStatus = await git.status();
     if (!repoStatus.isClean()) {
       throw new Error('repo is not clean, please clean all files before splitting');
     }
-    // TODO log current branch
+    const localBranches = await git.branchLocal();
+    notice(`You are on ${localBranches.current} branch`);
     // TODO check everything are fine to proceed, create branches
     // TODO compare 2 branches by each dir like `git rev-list --reverse --no-merges develop..HEAD -- projects/login`
     // TODO should I include --no-merges or no?
@@ -31,7 +34,7 @@ const repo = (workdir, options) => {
     // const revListRaw = await git.raw(['rev-list', '--reverse', '--no-merges',
     //  'develop..HEAD', '--', 'projects/login']);
     // const revListExample = (revListRaw || []).split('\n').slice(0, -1);
-    // console.log({ revListExample });
+    // info({ revListExample });
     // TODO run gco HASH DIRS (this will add files from dirs to unstaged)
     // TODO stage
     // TODO get commit message by HASH - git show-branch --no-name HASH
