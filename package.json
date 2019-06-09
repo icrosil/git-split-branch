@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
+    "chalk": "^2.4.2",
     "commander": "^2.20.0",
     "fuzzy-search": "^3.0.1",
     "readdirp": "^3.0.2",
