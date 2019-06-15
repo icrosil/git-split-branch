@@ -71,7 +71,8 @@ const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
 
 const getBranchesForSplit = async (git, localBranches, options) => {
   // TODO prompt user for names with some defaults by dir names
-  const branchSplitTo = ['git_split_check_login', 'git_split_check_packages'];
+  // TODO plus flag
+  const branchSplitTo = options.initialDirs.map(dir => `${localBranches.current}_${dir}`);
   branchSplitTo.forEach(branch => {
     if (localBranches.branches[branch]) {
       // TODO what if we want to proceed with existing branches?
@@ -85,10 +86,11 @@ const getBranchesForSplit = async (git, localBranches, options) => {
 };
 
 // TODO can i optimize it in terms of smarter git usage?
-const repo = async (workdir, workingDirectories, options) => {
+const repo = async (workdir, options) => {
   const git = await isWorkdirValid(workdir);
   await isRepoValid(git, workdir);
   await mvRootRepo(git, workdir, options);
+  const workingDirectories = options.foundDirs;
   const localBranches = await branchLookup(git);
   const branchesToSplit = await getBranchesForSplit(git, localBranches, options);
   const commitsPerDirs = await getCommitsPerDirs(git, workingDirectories, localBranches.current, options);
