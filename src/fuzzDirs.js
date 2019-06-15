@@ -1,6 +1,8 @@
 const readdirp = require('readdirp');
 const FuzzySearch = require('fuzzy-search');
 
+const { notice, info } = require('./log');
+
 const fuzzDirs = async (workdir, dirsToLookup) => {
   if (!workdir) {
     throw new Error('workdir not passed');
@@ -8,7 +10,7 @@ const fuzzDirs = async (workdir, dirsToLookup) => {
   if (!dirsToLookup || dirsToLookup.length === 0) {
     throw new Error('nothing to lookup');
   }
-  console.log('looking in dir ', workdir);
+  info('looking in dir ', workdir);
   // TODO can i avoid reading all dirs before searching and check on search?
   // TODO also good optimization is to cache already read dirs and continue on new request
   // TODO do for all dirs
@@ -23,11 +25,11 @@ const fuzzDirs = async (workdir, dirsToLookup) => {
       // TODO if bestDir exist (what if not)
       // TODO add ability to select with arrows if best choice not found correctly
       const [bestDirFuse] = fuzzy.search(currentDir);
-      console.log(`best match for ${currentDir} is ${bestDirFuse.path}`);
+      info(`best match for ${currentDir} is ${bestDirFuse.path}`);
       return bestDirFuse.path;
     });
   });
-  console.log({ bestDirsPaths });
+  notice(bestDirsPaths.join(' & '));
 };
 
 module.exports = fuzzDirs;

@@ -22,9 +22,14 @@ program
 program
   .command('repo <workdir>')
   .option('-R, --no-root', 'should we use git root or directory', false)
+  .option('-f, --from <String>', 'branch you would like to compare from', 'develop')
   .description('Perform git checks on workdir')
-  .action((workdir, options) => {
-    repo(workdir, options);
+  .action(async (workdir, options) => {
+    try {
+      await repo(workdir, options);
+    } catch (err) {
+      error(err.message);
+    }
   });
 
 program
@@ -32,6 +37,7 @@ program
   .option('-w, --workdir <String>', 'git repo', './')
   .arguments('<dir> [otherDirs...]')
   .action(() => {
+    // TODO use https://github.com/SBoudrias/Inquirer.js/ to have inputs on main app
     console.log('nothing to do yet');
   });
 
