@@ -1,4 +1,3 @@
-require('log-node')();
 const log = require('log');
 
 const chalk = require('./chalk');
@@ -19,4 +18,8 @@ module.exports = {
   info: blendLogAndChalk('info'),
   notice: blendLogAndChalk('notice'),
   error: blendLogAndChalk('error'),
+  initLog: () => {
+    // eslint-disable-next-line global-require
+    require('log-node')();
+  },
 };
