@@ -12,36 +12,39 @@ program.version(pack.version);
 program
   .command('find <workdir> [dirsToLookup...]')
   .description('helper to find dirs in workdir using fuzzy search')
-  .action((workdir, dirsToLookup = []) => {
-    const allDirsPassed = dirsToLookup.map(currentDir => {
-      return currentDir.split(';');
-    });
-    fuzzDirs(workdir, allDirsPassed);
-  });
+  .action(fuzzDirs);
 
 program
   .command('repo <workdir>')
-  .option('-R, --no-root', 'should we use git root or directory', false)
-  .option('-f, --from <String>', 'branch you would like to compare from', 'develop')
+  .option('-R, --no-root', 'should we use git root or directory')
+  .option('-f, --from <type>', 'branch you would like to compare from', 'develop')
   .description('Perform git checks on workdir')
   .action(async (workdir, options) => {
     try {
-      await repo(workdir, options);
+      // TODO remove it from latest build
+      await repo(workdir, [['packages'], ['projects/login', 'projects/nginx-serve-spa']], options);
     } catch (err) {
       error(err.message);
     }
   });
 
+// TODO add fail if passed nothing
 program
+  .option('-w, --workdir <type>', 'git repo', './')
+  .option('-R, --no-root', 'should we use git root or directory')
+  .option('-f, --from <type>', 'branch you would like to compare from', 'develop')
   .command('*')
-  .option('-w, --workdir <String>', 'git repo', './')
   .arguments('<dir> [otherDirs...]')
-  .action(() => {
+  .action(async (dir, otherDirs, { parent: options }) => {
     // TODO use https://github.com/SBoudrias/Inquirer.js/ to have inputs on main app
-    console.log('nothing to do yet');
+    try {
+      const foundDirs = await fuzzDirs(options.workdir, [dir, ...otherDirs]);
+      await repo(options.workdir, foundDirs, options);
+    } catch (err) {
+      error(err.message);
+    }
   });
 
-// TODO add logger
 try {
   program.parse(process.argv);
 } catch (err) {

@@ -50,11 +50,6 @@ const branchLookup = async git => {
   return localBranches;
 };
 
-const getWorkingDirs = async () => {
-  const mockDirs = [['packages'], ['projects/login', 'projects/nginx-serve-spa']];
-  return mockDirs;
-};
-
 const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
   // TODO it maybe should fail if options.from not updated to latest available or compare only to first ancestor
   notice(`Starting compare with branch ${options.from}`);
@@ -76,7 +71,7 @@ const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
 
 const getBranchesForSplit = async (git, localBranches, options) => {
   // TODO prompt user for names with some defaults by dir names
-  const branchSplitTo = ['git_split_check_packages', 'git_split_check_login'];
+  const branchSplitTo = ['git_split_check_login', 'git_split_check_packages'];
   branchSplitTo.forEach(branch => {
     if (localBranches.branches[branch]) {
       // TODO what if we want to proceed with existing branches?
@@ -90,12 +85,11 @@ const getBranchesForSplit = async (git, localBranches, options) => {
 };
 
 // TODO can i optimize it in terms of smarter git usage?
-const repo = async (workdir, options) => {
+const repo = async (workdir, workingDirectories, options) => {
   const git = await isWorkdirValid(workdir);
   await isRepoValid(git, workdir);
   await mvRootRepo(git, workdir, options);
   const localBranches = await branchLookup(git);
-  const workingDirectories = await getWorkingDirs();
   const branchesToSplit = await getBranchesForSplit(git, localBranches, options);
   const commitsPerDirs = await getCommitsPerDirs(git, workingDirectories, localBranches.current, options);
   const restructuredData = workingDirectories.map((dirArray, index) => {
@@ -127,7 +121,7 @@ const repo = async (workdir, options) => {
       info(`Done with dir ${dir}`);
     }),
   );
-  info('All commits applied');
+  notice('All commits applied');
   await cleanAfterDone(git, localBranches.current);
 };
 
