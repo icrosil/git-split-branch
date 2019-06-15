@@ -5,10 +5,8 @@ const program = require('commander');
 const pack = require('../package.json');
 const fuzzDirs = require('../src/fuzzDirs');
 const repo = require('../src/repo');
-const { error, initLog } = require('../src/log');
+const { error, initLog, notice } = require('../src/log');
 
-// TODO add fail if passed nothing
-// TODO add verbose flags
 // TODO add more logs (comparing what branch to what) creating branch from etc
 // TODO to dirs and commits separated by ';' we could give handlers on read to avoid it later
 program
@@ -39,6 +37,10 @@ program
 
 try {
   program.parse(process.argv);
+  if (!process.argv.slice(2).length) {
+    notice('Required directory not found in arguments, help is here ↵');
+    program.outputHelp();
+  }
 } catch (err) {
   error(err.message);
 }
