@@ -1,6 +1,7 @@
 const fs = require('fs');
 const gitP = require('simple-git/promise');
 const flatten = require('lodash/flatten');
+const inquirer = require('inquirer');
 
 const sequential = require('./utils/sequential');
 const { info, notice } = require('./log');
@@ -35,23 +36,33 @@ const mvRootRepo = async (git, workdir, options) => {
   }
 };
 
-const cleanAfterDone = async (git, initialBranch) => {
+const cleanAfterDone = async (git, startingBranch) => {
   const repoStatus = await git.status();
   if (!repoStatus.isClean()) {
     throw new Error('repo is not clean something went wrong');
   }
-  await git.checkout(initialBranch);
+  info(`Moving back to initial branch ${startingBranch}`);
+  await git.checkout(startingBranch);
 };
 
-const branchLookup = async git => {
-  const localBranches = await git.branchLocal();
-  const currentBranch = localBranches.current;
-  notice(`You are on ${currentBranch} branch`);
-  return localBranches;
+const branchLookup = async (git, options) => {
+  let localBranches = await git.branchLocal();
+  const startingBranch = localBranches.current;
+  if (options.to) {
+    info(`Using passed branch ${options.to} as current`);
+    info(`Switching from ${startingBranch}`);
+    if (!localBranches.all.includes(options.to)) {
+      throw new Error(`Branch ${options.to} not exist, cannot compare from it`);
+    }
+
+    git.checkout(options.to);
+    localBranches = await git.branchLocal();
+  }
+  notice(`You are on ${localBranches.current} branch`);
+  return { localBranches, startingBranch };
 };
 
 const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
-  // TODO it maybe should fail if options.from not updated to latest available or compare only to first ancestor
   notice(`Starting compare with branch ${options.from}`);
   const commitsPerDirs = await Promise.all(
     dirs.map(dirList => {
@@ -70,28 +81,55 @@ const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
 };
 
 const getBranchesForSplit = async (git, localBranches, options) => {
-  // TODO prompt user for names with some defaults by dir names
-  // TODO plus flag
-  const branchSplitTo = options.initialDirs.map(dir => `${localBranches.current}_${dir}`);
-  branchSplitTo.forEach(branch => {
-    if (localBranches.branches[branch]) {
-      // TODO what if we want to proceed with existing branches?
-      throw new Error(`branch ${branch} already exist, please pick different name or remove branch`);
+  const branchSplitTo = await sequential(
+    (options.branches
+      ? options.branches.split(';')
+      : options.initialDirs.map(dir => `${localBranches.current}_${dir}`)
+    ).map(branch => async () => {
+      const answer = await inquirer.prompt([
+        { message: `Branch for dirs ${options.foundDirs}`, name: 'branchName', default: branch },
+      ]);
+      return answer.branchName;
+    }),
+  );
+  if (options.branches) {
+    info(`using passed branches from options ${options.branches}`);
+    if (options.initialDirs.length !== branchSplitTo.length) {
+      throw new Error('');
     }
-  });
-  await Promise.all(branchSplitTo.map(branch => git.checkout(['-b', branch, options.from])));
+  }
+  await sequential(
+    branchSplitTo.map(branch => async () => {
+      if (localBranches.branches[branch]) {
+        const answer = await inquirer.prompt([
+          {
+            message: `Branch ${branch} already exist, do you want to proceed?`,
+            type: 'confirm',
+            name: 'shouldUseExisting',
+            default: false,
+          },
+        ]);
+        if (answer.shouldUseExisting) {
+          info('Using existing branch is not safe, but 🤷‍');
+        } else {
+          throw new Error(`branch ${branch} already exist, please pick different name or remove branch`);
+        }
+      } else {
+        await git.checkout(['-b', branch, options.from]);
+      }
+    }),
+  );
   notice(`Created branches ${branchSplitTo}`);
   await git.checkout(localBranches.current);
   return branchSplitTo;
 };
 
-// TODO can i optimize it in terms of smarter git usage?
 const repo = async (workdir, options) => {
   const git = await isWorkdirValid(workdir);
   await isRepoValid(git, workdir);
   await mvRootRepo(git, workdir, options);
   const workingDirectories = options.foundDirs;
-  const localBranches = await branchLookup(git);
+  const { localBranches, startingBranch } = await branchLookup(git, options);
   const branchesToSplit = await getBranchesForSplit(git, localBranches, options);
   const commitsPerDirs = await getCommitsPerDirs(git, workingDirectories, localBranches.current, options);
   const restructuredData = workingDirectories.map((dirArray, index) => {
@@ -116,7 +154,7 @@ const repo = async (workdir, options) => {
           const commitMessage = await git.raw(['show-branch', '--no-name', commit]);
           await git.checkout([commit, dir]);
           await git.add('./*');
-          await git.commit(commitMessage); // TODO message + dir;
+          await git.commit(`Added into dir ${dir} next commit: \n ${commitMessage}`);
           info(`Done with commit ${commit}`);
         }),
       );
@@ -124,7 +162,7 @@ const repo = async (workdir, options) => {
     }),
   );
   notice('All commits applied');
-  await cleanAfterDone(git, localBranches.current);
+  await cleanAfterDone(git, startingBranch);
 };
 
 module.exports = repo;
