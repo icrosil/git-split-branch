@@ -7,7 +7,9 @@
   "author": "Illia Olenchenko <icrosil@gmail.com>",
   "license": "MIT",
   "private": false,
-  "bin": "./bin",
+  "bin": {
+    "git-split-branch": "./bin/index.js"
+  },
   "files": [
     "./src",
     "./bin"
