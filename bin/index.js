@@ -11,7 +11,6 @@ function semicolonSeparatedList(value) {
   return value.split(';');
 }
 
-// TODO add more logs (comparing what branch to what) creating branch from etc
 program
   .version(pack.version)
   .option('-w, --workdir <directory>', 'git repo', './')

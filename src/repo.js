@@ -7,7 +7,7 @@ const sequential = require('./utils/sequential');
 const { info, notice } = require('./log');
 
 const isWorkdirValid = async workdir => {
-  info('repo action in ', workdir);
+  info(`Checking existing of ${workdir}`);
   if (!fs.existsSync(workdir)) {
     throw new Error(`workdir ${workdir} is not exists`);
   }
@@ -15,10 +15,12 @@ const isWorkdirValid = async workdir => {
 };
 
 const isRepoValid = async (git, workdir) => {
+  info('Verifying repository');
   return git.checkIsRepo().then(async isRepo => {
     if (!isRepo) {
       throw new Error(`workdir ${workdir} is not a git repo`);
     }
+    info('Verifying repository status');
     const repoStatus = await git.status();
     if (!repoStatus.isClean()) {
       throw new Error('repo is not clean, please clean all files before splitting');
@@ -50,11 +52,10 @@ const branchLookup = async (git, options) => {
   const startingBranch = localBranches.current;
   if (options.to) {
     info(`Using passed branch ${options.to} as current`);
-    info(`Switching from ${startingBranch}`);
+    info(`Switching from ${startingBranch} to ${options.to}`);
     if (!localBranches.all.includes(options.to)) {
       throw new Error(`Branch ${options.to} not exist, cannot compare from it`);
     }
-
     git.checkout(options.to);
     localBranches = await git.branchLocal();
   }
