@@ -15,3 +15,5 @@ This command will split your current branch, into 2 branches with dir0 and dir1 
 ## TODO
 
 fill readme
+node version
+user friendly readme
