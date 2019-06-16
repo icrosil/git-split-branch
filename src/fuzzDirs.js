@@ -3,7 +3,7 @@ const FuzzySearch = require('fuzzy-search');
 
 const { notice, info } = require('./log');
 
-const fuzzDirs = async (workdir, dirsToLookup) => {
+const fuzzDirs = async (workdir, dirsToLookup, options) => {
   if (!workdir) {
     throw new Error('workdir not passed');
   }
@@ -11,13 +11,11 @@ const fuzzDirs = async (workdir, dirsToLookup) => {
     throw new Error('nothing to lookup');
   }
   info('looking in dir ', workdir);
-  // TODO can i avoid reading all dirs before searching and check on search?
-  // TODO also good optimization is to cache already read dirs and continue on new request
-  // TODO do for all dirs
+  info(`Searching with ${options.findDepth} depth`);
   const dirs = await readdirp.promise(workdir, {
     type: 'directories',
-    depth: 5, // TODO configurable and proceed deeper if not found
-    directoryFilter: ['!.git', '!*modules'], // TODO also configurable?
+    depth: options.findDepth,
+    directoryFilter: ['!.git', '!*modules'],
   });
   const fuzzy = new FuzzySearch(dirs, ['path']);
   const bestDirsPaths = dirsToLookup.map(currentDirs => {
@@ -37,10 +35,10 @@ const fuzzDirs = async (workdir, dirsToLookup) => {
   return bestDirsPaths;
 };
 
-module.exports = async (workdir, dirsToLookup = []) => {
+module.exports = async (workdir, dirsToLookup = [], options) => {
   const allDirsPassed = dirsToLookup.map(currentDir => {
     return currentDir.split(';');
   });
-  const foundDirs = await fuzzDirs(workdir, allDirsPassed);
+  const foundDirs = await fuzzDirs(workdir, allDirsPassed, options);
   return foundDirs;
 };

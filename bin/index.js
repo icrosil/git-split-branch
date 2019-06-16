@@ -18,20 +18,21 @@ program
   .option('-f, --from <type>', 'branch you would like to compare from', 'develop')
   .option('-t, --to <branch>', 'branch you would like to compare to')
   .option('-b, --branches <branches>', 'branches you would like to commit to, separated by ";"', semicolonSeparatedList)
-  .option('-d, --debug [level]', 'logging extra information just in case, level could be specified')
+  .option('-v, --verbosity [level]', 'logging extra information just in case, level could be specified')
+  .option('-d, --find-depth <depth>', 'depth of looking for directories', 5)
   .arguments('<dir> [otherDirs...]')
   .action(async (dir, otherDirs, options) => {
     try {
-      if (options.debug) {
-        if (options.debug === true) {
+      if (options.verbosity) {
+        if (options.verbosity === true) {
           process.env.LOG_LEVEL = 'info';
         } else {
-          process.env.LOG_LEVEL = options.debug;
+          process.env.LOG_LEVEL = options.verbosity;
         }
       }
       initLog();
       const { git, workdir } = await mvWorkdir(options);
-      const foundDirs = await fuzzDirs(workdir, [dir, ...otherDirs]);
+      const foundDirs = await fuzzDirs(workdir, [dir, ...otherDirs], options);
       await repo(git, Object.assign({}, options, { initialDirs: [dir, ...otherDirs], foundDirs, workdir }));
     } catch (err) {
       error(err.message);
