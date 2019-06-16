@@ -22,7 +22,6 @@
     "lodash": "^4.17.11",
     "log": "^6.0.0",
     "log-node": "^7.0.0",
-    "promise-sequential": "^1.1.1",
     "readdirp": "^3.0.2",
     "simple-git": "^1.113.0"
   },
