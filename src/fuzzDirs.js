@@ -24,10 +24,8 @@ const fuzzDirs = async (workdir, dirsToLookup, options) => {
     dirsToLookup.map(currentDirs => async () => {
       return sequential(
         currentDirs.map(currentDir => async () => {
-          // TODO if bestDir exist (what if not)
-          // TODO add ability to select with arrows if best choice not found correctly
-          const [bestDirFuse] = fuzzy.search(currentDir);
-          if (!bestDirFuse || !bestDirFuse.path) {
+          const bestDirs = fuzzy.search(currentDir);
+          if (bestDirs.length === 0) {
             if (!options.maximumDepth) {
               const answer = await inquirer.prompt([
                 {
@@ -43,8 +41,18 @@ const fuzzDirs = async (workdir, dirsToLookup, options) => {
             }
             throw new Error(`workdir ${workdir} does not contain directory like ${currentDir}`);
           }
-          info(`best match for ${currentDir} is ${bestDirFuse.path}`);
-          return bestDirFuse.path;
+          const dirAnswer = await inquirer.prompt([
+            {
+              message: `Please confirm found directory`,
+              choices: bestDirs.map(({ path }) => path),
+              type: 'list',
+              name: 'correctDir',
+              default: bestDirs[0],
+            },
+          ]);
+          const bestDirFuse = dirAnswer.correctDir;
+          info(`best match for ${currentDir} is ${bestDirFuse}`);
+          return bestDirFuse;
         }),
       );
     }),
