@@ -10,7 +10,6 @@ const fuzzDirs = async (workdir, dirsToLookup) => {
   if (!dirsToLookup || dirsToLookup.length === 0) {
     throw new Error('nothing to lookup');
   }
-  // TODO maybe should be mv to root as in repo
   info('looking in dir ', workdir);
   // TODO can i avoid reading all dirs before searching and check on search?
   // TODO also good optimization is to cache already read dirs and continue on new request

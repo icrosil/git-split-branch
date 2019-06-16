@@ -33,9 +33,10 @@ const mvRootRepo = async (git, workdir, options) => {
   if (options.root) {
     notice(`Switching cwd to root of repo ${repoRoot}`);
     await git.cwd(repoRoot);
-  } else {
-    notice(`Leaving cwd in passed workdir ${workdir}`);
+    return repoRoot;
   }
+  notice(`Leaving cwd in passed workdir ${workdir}`);
+  return workdir;
 };
 
 const cleanAfterDone = async (git, startingBranch) => {
@@ -124,10 +125,18 @@ const getBranchesForSplit = async (git, localBranches, options) => {
   return branchSplitTo;
 };
 
-const repo = async (workdir, options) => {
+const mvWorkdir = async options => {
+  const { workdir } = options;
   const git = await isWorkdirValid(workdir);
   await isRepoValid(git, workdir);
-  await mvRootRepo(git, workdir, options);
+  const newWorkdir = await mvRootRepo(git, workdir, options);
+  return {
+    git,
+    workdir: newWorkdir,
+  };
+};
+
+const repo = async (git, options) => {
   const workingDirectories = options.foundDirs;
   const { localBranches, startingBranch } = await branchLookup(git, options);
   const branchesToSplit = await getBranchesForSplit(git, localBranches, options);
@@ -165,4 +174,7 @@ const repo = async (workdir, options) => {
   await cleanAfterDone(git, startingBranch);
 };
 
-module.exports = repo;
+module.exports = {
+  mvWorkdir,
+  repo,
+};

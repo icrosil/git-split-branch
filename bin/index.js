@@ -4,7 +4,7 @@ const program = require('commander');
 
 const pack = require('../package.json');
 const fuzzDirs = require('../src/fuzzDirs');
-const repo = require('../src/repo');
+const { repo, mvWorkdir } = require('../src/repo');
 const { error, initLog, notice } = require('../src/log');
 
 function semicolonSeparatedList(value) {
@@ -30,8 +30,9 @@ program
         }
       }
       initLog();
-      const foundDirs = await fuzzDirs(options.workdir, [dir, ...otherDirs]);
-      await repo(options.workdir, Object.assign({}, options, { initialDirs: [dir, ...otherDirs], foundDirs }));
+      const { git, workdir } = await mvWorkdir(options);
+      const foundDirs = await fuzzDirs(workdir, [dir, ...otherDirs]);
+      await repo(git, Object.assign({}, options, { initialDirs: [dir, ...otherDirs], foundDirs, workdir }));
     } catch (err) {
       error(err.message);
     }
