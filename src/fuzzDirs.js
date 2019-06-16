@@ -43,7 +43,7 @@ const fuzzDirs = async (workdir, dirsToLookup, options) => {
           }
           const dirAnswer = await inquirer.prompt([
             {
-              message: `Please confirm found directory`,
+              message: `Please confirm found directory for '${currentDir}'`,
               choices: bestDirs.map(({ path }) => path),
               type: 'list',
               name: 'correctDir',

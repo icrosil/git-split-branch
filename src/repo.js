@@ -84,14 +84,15 @@ const getCommitsPerDirs = async (git, dirs, currentBranch, options) => {
 
 const getBranchesForSplit = async (git, localBranches, options) => {
   const branchSplitTo = await sequential(
-    (options.branches ? options.branches : options.initialDirs.map(dir => `${localBranches.current}_${dir}`)).map(
-      branch => async () => {
-        const answer = await inquirer.prompt([
-          { message: `Branch for dirs ${options.foundDirs}`, name: 'branchName', default: branch },
-        ]);
-        return answer.branchName;
-      },
-    ),
+    (options.branches
+      ? options.branches
+      : options.initialDirs.map(dir => `${localBranches.current}_${dir.replace(';', '_')}`)
+    ).map((branch, dirIndex) => async () => {
+      const answer = await inquirer.prompt([
+        { message: `Branch for dirs ${options.foundDirs[dirIndex]}`, name: 'branchName', default: branch },
+      ]);
+      return answer.branchName;
+    }),
   );
   if (options.branches) {
     info(`using passed branches from options ${options.branches}`);
