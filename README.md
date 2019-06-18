@@ -3,6 +3,8 @@
 # git-split-branch
 Ever wanted to split big branch by directories changed? Stop giving your teammates big PRs if you can split it.
 
+![](DEMO.gif)
+
 ## Installation
 
 Next commands will add `git-split-branch` binary to your binary list.
