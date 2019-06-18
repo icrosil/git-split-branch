@@ -15,7 +15,7 @@ program
   .version(pack.version)
   .option('-w, --workdir <directory>', 'git repo', './')
   .option('-R, --no-root', 'should we use git root or directory')
-  .option('-f, --from <type>', 'branch you would like to compare from', 'develop')
+  .option('-f, --from <branch>', 'branch you would like to compare from', 'develop')
   .option('-t, --to <branch>', 'branch you would like to compare to')
   .option('-b, --branches <branches>', 'branches you would like to commit to, separated by ";"', semicolonSeparatedList)
   .option('-v, --verbosity [level]', 'logging extra information just in case, level could be specified')
