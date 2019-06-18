@@ -11,7 +11,6 @@ function semicolonSeparatedList(value) {
   return value.split(';');
 }
 
-// Comment1
 program
   .version(pack.version)
   .option('-w, --workdir <directory>', 'git repo', './')
