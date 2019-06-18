@@ -10,6 +10,7 @@ const initLog = () => {
   logInit();
 };
 
+// Comment1
 const blendLogAndChalk = level => {
   if (!log[level]) {
     throw new Error(`level ${level} not exist in log`);
