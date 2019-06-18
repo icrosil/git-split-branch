@@ -3,7 +3,7 @@
 # git-split-branch
 Ever wanted to split big branch by directories changed? Stop giving your teammates big PRs if you can split it.
 
-![demo gif](DEMO.gif)
+![](DEMO.gif)
 
 ## Installation
 
