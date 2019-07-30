@@ -14,7 +14,7 @@ const isWorkdirValid = async workdir => {
   return gitP(workdir);
 };
 
-const isRepoValid = async (git, workdir) => {
+const isRepoValid = async (git, workdir, options) => {
   info('Verifying repository');
   return git.checkIsRepo().then(async isRepo => {
     if (!isRepo) {
@@ -24,6 +24,16 @@ const isRepoValid = async (git, workdir) => {
     const repoStatus = await git.status();
     if (!repoStatus.isClean()) {
       throw new Error('repo is not clean, please clean all files before splitting');
+    }
+    info(`checking from branch, checkout to ${options.from}`);
+    await git.checkout(options.from);
+    const repoStatusFrom = await git.status();
+    await git.checkout(repoStatus.current);
+    if (repoStatusFrom.behind >= 0 || repoStatusFrom.ahead >= 0) {
+      throw new Error(
+        `branch ${options.from} is diverged from ${repoStatusFrom.tracking}
+${repoStatusFrom.behind}/${repoStatusFrom.ahead} behind/ahead`,
+      );
     }
   });
 };
@@ -129,7 +139,7 @@ const getBranchesForSplit = async (git, localBranches, options) => {
 const mvWorkdir = async options => {
   const { workdir } = options;
   const git = await isWorkdirValid(workdir);
-  await isRepoValid(git, workdir);
+  await isRepoValid(git, workdir, options);
   const newWorkdir = await mvRootRepo(git, workdir, options);
   return {
     git,
