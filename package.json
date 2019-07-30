@@ -1,6 +1,6 @@
 {
   "name": "git-split-branch",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "split your branch into multiple by directories",
   "main": "bin/index.js",
   "repository": "git@github.com-icrosil:icrosil/git-split-branch.git",
