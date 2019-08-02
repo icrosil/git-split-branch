@@ -29,7 +29,7 @@ const isRepoValid = async (git, workdir, options) => {
     await git.checkout(options.from);
     const repoStatusFrom = await git.status();
     await git.checkout(repoStatus.current);
-    if (repoStatusFrom.behind >= 0 || repoStatusFrom.ahead >= 0) {
+    if (repoStatusFrom.behind > 0 || repoStatusFrom.ahead > 0) {
       throw new Error(
         `branch ${options.from} is diverged from ${repoStatusFrom.tracking}
 ${repoStatusFrom.behind}/${repoStatusFrom.ahead} behind/ahead`,
